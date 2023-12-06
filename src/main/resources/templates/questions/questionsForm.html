@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+
+<head>
+	<title>Câu hỏi</title>
+</head>
+
+<body>
+	<form th:fragment="QuestionsForm" class="modal-body" th:object="${QuestionsForm}" th:onsubmit="return false;">
+		<h5 class="modal-title col-12 text-center">Câu hỏi<span class="spinner-grow text-danger float-end invisible"
+				role="status" id="form-spinner"></span></h5>
+		<hr>
+		<div class="row">
+			<label for="categoryId" class="form-label">Tên danh mục</label>
+			<div>
+				<select th:field="*{categoryId}" class="form-select form-select-sm" th:errorclass="is-invalid">
+					<option th:value="0">Danh mục</option>
+					<option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}">
+					</option>
+				</select>
+				<span th:errors="*{categoryId}" class="invalid-feedback">field error</span>
+			</div>
+		</div>
+		<div class="row">
+			<label for="content" class="form-label">Nội dung</label>
+			<div>
+				<textarea th:field="*{content}" autocomplete="off" autofocus="autofocus"
+					class="form-control form-control-sm" th:errorclass="is-invalid"
+					placeholder="Nội dung câu hỏi"></textarea>
+				<span th:errors="*{content}" class="invalid-feedback">field error</span>
+			</div>
+		</div>
+		<div class="row mb-2">
+			<label for="type" class="form-label">Loại trả lời</label>
+			<div>
+				<select th:field="*{type}" class="form-select form-select-sm" th:errorclass="is-invalid">
+					<option th:value="radio">Chọn một đáp án</option>
+					<option th:value="checkbox">Chọn nhiều đáp án</option>
+				</select>
+				<span th:errors="*{type}" class="invalid-feedback">field error</span>
+			</div>
+		</div>
+		<div class="row row-answer mb-2" th:each="row, stat : ${QuestionsForm.answers}">
+			<div>
+				<div>
+					<label role="button"><input th:field="*{answers[__${stat.index}__].correct}" type="checkbox" class="form-check-input" value="true"/> Đáp án đúng</label>
+					<label class="text-danger float-end remove-answer" role="button"><i class="bi bi-x-square"></i> Xóa</label>
+				</div>
+				<textarea th:field="*{answers[__${stat.index}__].content}" autocomplete="off"
+						class="form-control form-control-sm" th:errorclass="is-invalid" th:placeholder="${'Đáp án ' + (stat.index + 1)}"></textarea>
+			</div>
+			<span th:errors="*{answers[__${stat.index}__].content}" class="text-danger">field error</span>
+			<input th:field="*{answers[__${stat.index}__].id}" type="hidden"/>
+		</div>
+		<div class="row">
+			<div class="d-grid">
+				<button type="button" id="btn-add-answer" class="btn btn-primary btn-sm"><i
+					class="bi bi-plus-circle"></i> Đáp án</button>
+			</div>
+		</div>
+		<span th:errors="*{global}" class="text-danger">global error</span>
+		<hr>
+		<button type="submit" class="btn btn-primary btn-sm float-end"><i class="bi bi-person-check-fill"></i>
+			Cập nhật</button>
+		<button type="button" class="btn btn-secondary btn-sm float-end me-1" data-bs-dismiss="modal">Thoát</button>
+		<input type="hidden" th:field="*{type}"/>
+		<input type="hidden" th:field="*{id}"/>
+		<script>
+			$('label.remove-answer').off().click((e) => {
+				const i = $(e.target);
+				const EditForm = $(i).closest('form.modal-body');
+				const div1 = i.closest('div.row-answer');
+				div1.remove();
+
+				EditForm.find("textarea[name$='].content']").each((i, e) => {$(e).attr('name', 'answers[' + i + '].content').attr('placeholder', 'Đáp án ' + (i + 1));});
+					EditForm.find("input[name$='].correct'][type='checkbox']").each((i, e) => {$(e).attr('name', 'answers[' + i + '].correct');});
+					EditForm.find("input[name$='].id'][type='hidden']").each((i, e) => {$(e).attr('name', 'answers[' + i + '].id');});
+			});
+
+			$('button#btn-add-answer').off().click((e) => {
+				const btnAddAnswer = $(e.target);
+				const EditForm = $(btnAddAnswer).closest('form.modal-body');
+				const answers = EditForm.find("textarea[name^='answers']");
+				const i = answers.length;
+				const lastItem =$(btnAddAnswer).closest('div.row');
+
+				const div1 = $('<div class="row row-answer mb-2"></div>');
+				lastItem.before(div1);
+
+				const div2 = $('<div></div>');
+				div2.appendTo(div1);
+
+				const div3 = $('<div></div>');
+				div3.appendTo(div2);
+
+				const textarea = $('<textarea autocomplete="off" class="form-control form-control-sm"></textarea>');
+				textarea.attr('name', 'answers[' + i + '].content');
+				textarea.attr('placeholder', 'Đáp án ' + (i + 1));
+				textarea.appendTo(div2);
+
+				const labelCorrect = $('<label role="button"> Đáp án đúng</label>');
+				labelCorrect.appendTo(div3);
+				const correct = $('<input type="checkbox" class="form-check-input" value="true"/>');
+				correct.attr('name', 'answers[' + i + '].correct');
+				labelCorrect.prepend(correct);
+
+				const labeli = $('<label class="text-danger float-end remove-answer" role="button"><i class="bi bi-x-square"></i> Xóa</label>');
+				labeli.appendTo(div3);
+
+				const id = $('<input type="hidden" value="0"/>');
+				id.attr('name', 'answers[' + i + '].id');
+				id.appendTo(div1);
+
+				labeli.click(() => {
+					div1.remove();
+
+					EditForm.find("textarea[name$='].content']").each((i, e) => {$(e).attr('name', 'answers[' + i + '].content').attr('placeholder', 'Đáp án ' + (i + 1));});
+					EditForm.find("input[name$='].correct'][type='checkbox']").each((i, e) => {$(e).attr('name', 'answers[' + i + '].correct');});
+					EditForm.find("input[name$='].id'][type='hidden']").each((i, e) => {$(e).attr('name', 'answers[' + i + '].id');});
+				});
+
+				textarea.focus();
+			});
+		</script>
+	</form>
+</body>
+
+</html>

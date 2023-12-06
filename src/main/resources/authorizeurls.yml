@@ -1,0 +1,12 @@
+permitall:
+  - url: /password
+  - url: /
+authorizeurls:
+  - url: /accounts/**
+    roles: ADMIN
+  - url: /categories/**
+    roles: ADMIN
+  - url: /questions/**
+    roles: ADMIN
+  - url: /quiz/**
+    roles: ADMIN,MEMBER

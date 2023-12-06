@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+
+<head>
+	<title>Bài thi</title>
+</head>
+
+<body>
+	<form th:fragment="QuizForm" class="modal-body" th:object="${QuizForm}" th:onsubmit="return false;">
+		<h5 class="modal-title col-12 text-center">Bài kiểm tra<span class="spinner-grow text-danger float-end invisible"
+				role="status" id="form-spinner"></span></h5>
+		<hr>
+		<div class="row">
+			<label for="name" class="form-label">Tên</label>
+			<div>
+				<input th:field="*{name}" autocomplete="off" autofocus="autofocus"
+					class="form-control form-control-sm" th:errorclass="is-invalid" />
+				<span th:errors="*{name}" class="invalid-feedback">field error</span>
+			</div>
+		</div>
+		<div class="row">
+			<label for="maxQuestion" class="form-label">Số bài</label>
+			<div>
+				<input th:field="*{maxQuestion}" autocomplete="off" autofocus="autofocus"
+					class="form-control form-control-sm" th:errorclass="is-invalid" type="number" />
+				<span th:errors="*{maxQuestion}" class="invalid-feedback">field error</span>
+			</div>
+		</div>
+		<div class="row">
+			<label for="minQuestion" class="form-label">Tối thiểu</label>
+			<div>
+				<input th:field="*{minQuestion}" autocomplete="off" autofocus="autofocus"
+					class="form-control form-control-sm" th:errorclass="is-invalid" type="number" />
+				<span th:errors="*{minQuestion}" class="invalid-feedback">field error</span>
+			</div>
+		</div>
+		<div class="row">
+			<label for="duration" class="form-label">Thời gian</label>
+			<div>
+				<input th:field="*{duration}" autocomplete="off" autofocus="autofocus"
+					class="form-control form-control-sm" th:errorclass="is-invalid" type="number" />
+				<span th:errors="*{duration}" class="invalid-feedback">field error</span>
+			</div>
+		</div>
+		<div class="row">
+			<label for="remark" class="form-label">Ghi chú</label>
+			<div>
+				<textarea th:field="*{remark}" autocomplete="off" autofocus="autofocus"
+					class="form-control form-control-sm" th:errorclass="is-invalid"></textarea>
+				<span th:errors="*{remark}" class="invalid-feedback">field error</span>
+			</div>
+		</div>
+		<span th:errors="*{global}" class="text-danger">global error</span>
+		<hr>
+		<button type="submit" class="btn btn-primary btn-sm float-end"><i class="bi bi-person-check-fill"></i>
+			Cập nhật</button>
+		<button type="button" class="btn btn-secondary btn-sm float-end me-1" data-bs-dismiss="modal">Thoát</button>
+		<input type="hidden" th:field="*{id}">
+	</form>
+</body>
+
+</html>

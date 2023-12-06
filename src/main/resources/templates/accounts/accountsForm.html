@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+
+<head>
+	<title>ACCOUNTS</title>
+</head>
+
+<body>
+	<form th:fragment="AccountsForm" class="modal-body" th:object="${AccountsForm}" th:onsubmit="return false;">
+		<h5 class="modal-title col-12 text-center">Tài khoản<span class="spinner-grow text-danger float-end invisible"
+				role="status" id="form-spinner"></span></h5>
+		<hr>
+		<div class="row">
+			<label for="username" class="form-label">Tài khoản</label>
+			<div>
+				<input th:field="*{username}" autocomplete="off" autofocus="autofocus"
+					class="form-control form-control-sm" th:errorclass="is-invalid" />
+				<span th:errors="*{username}" class="invalid-feedback">field error</span>
+			</div>
+		</div>
+		<div class="row">
+			<label for="password" class="form-label">Mật khẩu</label>
+			<div>
+				<input th:field="*{password}" type="password" class="form-control form-control-sm"
+					th:errorclass="is-invalid" />
+				<span th:errors="*{password}" class="invalid-feedback">field error</li>
+			</div>
+		</div>
+		<div class="row">
+			<label for="role" class="form-label">Chức vụ</label>
+			<div>
+				<select th:field="*{role}" class="form-select form-select-sm" th:errorclass="is-invalid">
+					<option value=""></option>
+					<option value="ROLE_ADMIN">Quản lý</option>
+					<option value="ROLE_MEMBER">Học viên</option>
+				</select>
+				<span th:errors="*{role}" class="invalid-feedback">field error</li>
+			</div>
+		</div>
+		<span th:errors="*{global}" class="text-danger">global error</span>
+		<hr>
+		<button type="submit" class="btn btn-primary btn-sm float-end"><i class="bi bi-person-check-fill"></i>
+			Cập nhật</button>
+		<button type="button" class="btn btn-secondary btn-sm float-end me-1" data-bs-dismiss="modal">Thoát</button>
+		<input type="hidden" th:field="*{id}">
+		<input type="hidden" th:field="*{status}">
+	</form>
+</body>
+
+</html>

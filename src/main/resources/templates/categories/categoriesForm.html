@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+
+<head>
+	<title>Danh mục</title>
+</head>
+
+<body>
+	<form th:fragment="CategoriesForm" class="modal-body" th:object="${CategoriesForm}" th:onsubmit="return false;">
+		<h5 class="modal-title col-12 text-center">Danh mục<span class="spinner-grow text-danger float-end invisible"
+				role="status" id="form-spinner"></span></h5>
+		<hr>
+		<div class="row">
+			<label for="name" class="form-label">Tên danh mục</label>
+			<div>
+				<input th:field="*{name}" autocomplete="off" autofocus="autofocus"
+					class="form-control form-control-sm" th:errorclass="is-invalid" />
+				<span th:errors="*{name}" class="invalid-feedback">field error</span>
+			</div>
+		</div>
+		<span th:errors="*{global}" class="text-danger">global error</span>
+		<hr>
+		<button type="submit" class="btn btn-primary btn-sm float-end"><i class="bi bi-person-check-fill"></i>
+			Cập nhật</button>
+		<button type="button" class="btn btn-secondary btn-sm float-end me-1" data-bs-dismiss="modal">Thoát</button>
+		<input type="hidden" th:field="*{id}">
+	</form>
+</body>
+
+</html>
