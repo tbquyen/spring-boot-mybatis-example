@@ -1,5 +1,3 @@
-const token = $("meta[name='_csrf']").attr("content");
-const header = $("meta[name='_csrf_header']").attr("content");
 const searchs = { name: "" };
 
 const dataTable = $('#dataTable').DataTable({
@@ -18,7 +16,6 @@ const dataTable = $('#dataTable').DataTable({
 			params.name = searchs.name;
 		},
 		"beforeSend": function(jqXHR, settings) {
-			jqXHR.setRequestHeader(header, token);
 			$("#txt-search").prop('disabled', true);
 			$("#btn-search").prop('disabled', true);
 		},
@@ -59,7 +56,6 @@ const loadModel = function(target, id) {
 		type: "GET",
 		url: "categories/" + id,
 		beforeSend: function(jqXHR, settings) {
-			jqXHR.setRequestHeader(header, token);
 			$(modalContent).html('<div class="text-center"><div class="spinner-grow text-danger" role="status" style="width: 3rem; height: 3rem;"></div></div>');
 			$(modal).modal({ backdrop: 'static' }).modal("show");
 		},
@@ -90,7 +86,6 @@ const update = function(event, id) {
 		type: "POST",
 		data: $(target).serialize(),
 		beforeSend: function(jqXHR, settings) {
-			jqXHR.setRequestHeader(header, token);
 			$(target).find(":input").prop('disabled', true);
 			$("#form-spinner").removeClass("invisible");
 		},
@@ -119,7 +114,6 @@ const remove = function(id) {
 			url: "categories/" + id,
 			type: "DELETE",
 			beforeSend: function(jqXHR, settings) {
-				jqXHR.setRequestHeader(header, token);
 			},
 			success: function(data, textStatus, jqXHR) {
 				dataTable.ajax.reload(null, false);

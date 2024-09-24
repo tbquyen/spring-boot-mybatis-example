@@ -1,5 +1,3 @@
-const token = $("meta[name='_csrf']").attr("content");
-const header = $("meta[name='_csrf_header']").attr("content");
 const searchs = { name: "" };
 
 const dataTable = $('#dataTable').DataTable({
@@ -18,7 +16,6 @@ const dataTable = $('#dataTable').DataTable({
 			params.name = searchs.name;
 		},
 		"beforeSend": function(jqXHR, settings) {
-			jqXHR.setRequestHeader(header, token);
 			$("#txt-search").prop('disabled', true);
 			$("#btn-search").prop('disabled', true);
 		},
@@ -62,7 +59,6 @@ const loadModel = (target, id) => {
 		type: "GET",
 		url: "quiz/" + id,
 		beforeSend: function(jqXHR, settings) {
-			jqXHR.setRequestHeader(header, token);
 			$(modalContent).html('<div class="text-center"><div class="spinner-grow text-danger" role="status" style="width: 3rem; height: 3rem;"></div></div>');
 			$(modal).modal({ backdrop: 'static' }).modal("show");
 		},
@@ -93,7 +89,6 @@ const update = (event, id) => {
 		type: "POST",
 		data: $(target).serialize(),
 		beforeSend: function(jqXHR, settings) {
-			jqXHR.setRequestHeader(header, token);
 			$(target).find(":input").prop('disabled', true);
 			$("#form-spinner").removeClass("invisible");
 		},
@@ -106,7 +101,7 @@ const update = (event, id) => {
 			if (jqXHR.status === 400) {
 				$(modalContent).html(jqXHR.responseText);
 			} else {
-				$(modalContent).html(jqXHR.responseText);
+				DialogAlert({ bgcolor: 'bg-danger', message: jqXHR.responseText });
 			}
 		},
 		complete: function(jqXHR, textStatus) {
@@ -122,7 +117,6 @@ const remove = (id) => {
 			url: "quiz/" + id,
 			type: "DELETE",
 			beforeSend: function(jqXHR, settings) {
-				jqXHR.setRequestHeader(header, token);
 			},
 			success: function(data, textStatus, jqXHR) {
 				dataTable.ajax.reload(null, false);

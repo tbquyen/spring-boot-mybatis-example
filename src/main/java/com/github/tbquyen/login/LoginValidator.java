@@ -5,6 +5,8 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
+import com.github.tbquyen.entity.Accounts;
+
 @Service
 public class LoginValidator implements Validator {
 
@@ -12,7 +14,7 @@ public class LoginValidator implements Validator {
    * This Validator validates *just* LoginForm instances
    */
   public boolean supports(Class<?> clazz) {
-    return LoginForm.class == clazz;
+    return Accounts.class == clazz;
   }
 
   public void validate(Object target, Errors errors) {

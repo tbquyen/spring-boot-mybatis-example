@@ -74,7 +74,7 @@ const DialogAlert = function(options) {
 		textcolor: "text-white",
 		message: "Hello, world! This is a toast message.",
 		animation: true,
-		autohide: true,
+		autohide: false,
 		delay: 5000,
 		icon: "bi bi-check-circle",
 	}, options);

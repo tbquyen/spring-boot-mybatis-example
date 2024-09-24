@@ -1,4 +1,6 @@
 permitall:
+  - url: /error
+  - url: /login
   - url: /password
   - url: /
 authorizeurls:

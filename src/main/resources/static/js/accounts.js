@@ -1,5 +1,3 @@
-const token = $("meta[name='_csrf']").attr("content"); 
-const header = $("meta[name='_csrf_header']").attr("content");
 const searchs = { username: "", role: "" };
 
 const dataTable = $('#usersTable').DataTable({
@@ -19,7 +17,6 @@ const dataTable = $('#usersTable').DataTable({
 			params.role = searchs.role;
 		},
 		"beforeSend": function(jqXHR, settings) {
-			jqXHR.setRequestHeader(header, token);
 			$("#txt-search").prop('disabled', true);
 			$("#txt-role").prop('disabled', true);
 			$("#btn-search").prop('disabled', true);
@@ -78,7 +75,6 @@ const loadModel = function(target, id) {
 		type: "GET",
 		url: "accounts/" + id,
 		beforeSend: function(jqXHR, settings) {
-			jqXHR.setRequestHeader(header, token);
 			$(modalContent).html('<div class="text-center"><div class="spinner-grow text-danger" role="status" style="width: 3rem; height: 3rem;"></div></div>');
 			$(modal).modal({ backdrop: 'static' }).modal("show");
 		},
@@ -91,7 +87,7 @@ const loadModel = function(target, id) {
 		complete: function(jqXHR, textStatus) {
 			$(target).prop('disabled', false);
 			const UsersForm = $(modalContent).children('form');
-			UsersForm.submit(function(event) { update(event, id); });
+			UsersForm.off().submit(function(event) { update(event, id); });
 		},
 	});
 };
@@ -109,7 +105,6 @@ const update = function(event, id) {
 		type: "POST",
 		data: $(target).serialize(),
 		beforeSend: function(jqXHR, settings) {
-			jqXHR.setRequestHeader(header, token);
 			$(target).find(":input").prop('disabled', true);
 			$("#form-spinner").removeClass("invisible");
 		},
@@ -122,12 +117,14 @@ const update = function(event, id) {
 			if (jqXHR.status === 400) {
 				$(modalContent).html(jqXHR.responseText);
 			} else {
-				$(modalContent).html(jqXHR.responseText);
+				DialogAlert({ bgcolor: 'bg-danger', message: jqXHR.responseText });
 			}
 		},
 		complete: function(jqXHR, textStatus) {
+			$(target).find(":input").prop('disabled', false);
+			$("#form-spinner").addClass("invisible");
 			const UsersForm = $(modalContent).children('form');
-			UsersForm.submit(function(event) { update(event); });
+			UsersForm.off().submit(function(event) { update(event, id); });
 		},
 	});
 }
@@ -138,7 +135,6 @@ const remove = function(id) {
 			url: "accounts/" + id,
 			type: "DELETE",
 			beforeSend: function(jqXHR, settings) {
-				jqXHR.setRequestHeader(header, token);
 			},
 			success: function(data, textStatus, jqXHR) {
 				dataTable.ajax.reload(null, false);

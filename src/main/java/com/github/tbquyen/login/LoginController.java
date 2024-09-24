@@ -1,71 +1,81 @@
 package com.github.tbquyen.login;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.web.WebAttributes;
-import org.springframework.security.web.authentication.session.SessionAuthenticationException;
-import org.springframework.security.web.savedrequest.SavedRequest;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.RedirectView;
 
+import com.github.tbquyen.config.JwtService;
 import com.github.tbquyen.config.MyPrincipal;
+import com.github.tbquyen.entity.Accounts;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 @RequestMapping("/login")
 public class LoginController {
-  private final Log LOGGER = LogFactory.getLog(getClass());
-  public static final String VIEW_HOME = "app/login";
+  public static final String VIEW_NAME = "app/login";
+
+  @Autowired
+  private JwtService jwtService;
+  @Autowired
+  private UserDetailsServiceImpl detailsServiceImpl;
+  @Autowired
+  private PasswordEncoder passwordEncoder;
 
   @GetMapping
-  public ModelAndView login(HttpSession session, HttpServletRequest request,
-      @ModelAttribute("LoginForm") LoginForm loginForm, BindingResult result) {
-    MyPrincipal principal = MyPrincipal.getInstance();
-    if (principal.isFullyAuthenticated()) {
-      LOGGER.debug("Login with acccount: " + principal.getName());
-      return new ModelAndView("forward:/");
+  public ModelAndView login(@ModelAttribute("LoginForm") Accounts loginForm,
+      @RequestParam(value = "out", required = false) String out, HttpServletResponse response) {
+    if (StringUtils.hasText(out)) {
+      jwtService.removeToken(response);
+    } else if (MyPrincipal.getInstance().isAuthenticated()) {
+      return new ModelAndView("redirect:/");
     }
 
-    ModelAndView mv = new ModelAndView(VIEW_HOME);
-    mv.setStatus(HttpStatus.UNAUTHORIZED);
+    return new ModelAndView(VIEW_NAME);
+  }
 
-    Object authenticationException = session.getAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
-    session.removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
+  @PostMapping
+  public ModelAndView post(ModelMap modelMap, @ModelAttribute("LoginForm") Accounts loginForm, BindingResult result,
+      HttpServletResponse response) {
+    if (result.hasErrors()) {
+      return new ModelAndView(VIEW_NAME, HttpStatus.BAD_REQUEST);
+    }
 
-    if (authenticationException instanceof SessionAuthenticationException) {
-      LOGGER.debug("Login Fail: SessionAuthenticationException");
-      result.reject("login.002");
-    } else if (authenticationException instanceof PasswordExpiredException) {
-      LOGGER.debug("Login Fail: PasswordExpiredException");
-      PasswordExpiredException exception = (PasswordExpiredException) authenticationException;
-      BeanUtils.copyProperties(exception.getLoginForm(), loginForm);
-      return new ModelAndView(new RedirectView("/password?username=" + loginForm.getUsername()));
-    } else if (authenticationException instanceof LoginAuthenticationException) {
-      LOGGER.debug("Login Fail: LoginAuthenticationException");
-      mv.setStatus(HttpStatus.BAD_REQUEST);
-      LoginAuthenticationException exception = (LoginAuthenticationException) authenticationException;
-      result.addAllErrors(exception.getErrors());
-      BeanUtils.copyProperties(exception.getLoginForm(), loginForm);
-    } else if (principal.isRememberMe()) {
-      mv.setStatus(HttpStatus.NON_AUTHORITATIVE_INFORMATION);
+    try {
+      UserDetails userDetails = detailsServiceImpl.loadUserByUsername(loginForm.getUsername());
 
-      SavedRequest savedRequest = (SavedRequest) request.getSession().getAttribute("SPRING_SECURITY_SAVED_REQUEST");
-      if(savedRequest != null) {
-        result.reject("login.003", new Object[] {savedRequest.getRedirectUrl()}, null);
+      if (passwordEncoder.matches(loginForm.getPassword(), userDetails.getPassword())) {
+        if (!userDetails.isCredentialsNonExpired()) { // mật khẩu hết hạn
+          result.reject("login.002");
+        } else if (!userDetails.isAccountNonLocked()) { // Tài khoản bị khóa
+          result.reject("login.003");
+        } else if (!userDetails.isAccountNonExpired()) { // Tài khoản hết hạn
+          result.reject("login.004");
+        } else if (!userDetails.isEnabled()) { // Tài khoản vô hiệu hóa
+          result.reject("login.005");
+        } else {
+          jwtService.setTokenToCookie(response, userDetails);
+          return new ModelAndView("redirect:/");
+        }
       } else {
-        result.reject("login.004");
+        result.reject("login.001"); // Thông tin đăng nhập không chính xác
       }
+    } catch (UsernameNotFoundException e) {
+      result.reject("login.001"); // Thông tin đăng nhập không chính xác
     }
 
-    return mv;
+    return new ModelAndView(VIEW_NAME);
   }
 }
